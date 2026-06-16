@@ -8,10 +8,14 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = require('./firebaseServiceAccount.json');
 }
 
-if (!admin.apps.length) {
+try {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
+} catch (error) {
+  if (!/already exists/u.test(error.message)) {
+    console.log('Error inicializando Firebase:', error.message);
+  }
 }
 
 module.exports = admin;
