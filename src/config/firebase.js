@@ -1,4 +1,5 @@
-const admin = require('firebase-admin');
+const {initializeApp, getApps, cert} = require('firebase-admin/app');
+const {getMessaging} = require('firebase-admin/messaging');
 
 let serviceAccount;
 
@@ -8,10 +9,12 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   serviceAccount = require('./firebaseServiceAccount.json');
 }
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(serviceAccount),
   });
 }
 
-module.exports = admin;
+module.exports = {
+  messaging: () => getMessaging(),
+};
