@@ -24,7 +24,7 @@ const loginRateLimit = (req, res, next) => {
   }
 
   res.on('finish', () => {
-    if (res.statusCode === 401) {
+    if ([401, 404].includes(res.statusCode)) {
       const anterior = intentos.get(clave);
       if (!anterior || Date.now() - anterior.inicio >= VENTANA) {
         intentos.set(clave, {inicio: Date.now(), cantidad: 1});
