@@ -22,7 +22,7 @@ const protegerRuta = async (req, res, next) => {
 
     const usuario = await User.findById(decoded.id).select('-password');
 
-    if (!usuario) {
+    if (!usuario || !usuario.estado) {
       return res.status(401).json({
         mensaje: 'Usuario no válido'
       });

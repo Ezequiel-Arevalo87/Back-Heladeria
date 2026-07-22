@@ -6,9 +6,10 @@ const {
   marcarComoLeida,
   enviarNotificacionTest
 } = require('../controllers/notificationController');
+const { protegerRuta, autorizarRoles } = require('../middlewares/authMiddleware');
 
-router.get('/', listarNotificaciones);
-router.put('/:id/leida', marcarComoLeida);
-router.post('/test', enviarNotificacionTest);
+router.get('/', protegerRuta, listarNotificaciones);
+router.put('/:id/leida', protegerRuta, marcarComoLeida);
+router.post('/test', protegerRuta, autorizarRoles('ADMIN'), enviarNotificacionTest);
 
 module.exports = router;

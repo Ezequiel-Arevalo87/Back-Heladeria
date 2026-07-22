@@ -1,0 +1,3 @@
+const mongoose=require('mongoose');
+const schema=new mongoose.Schema({venta:{type:mongoose.Schema.Types.ObjectId,ref:'Sale',required:true,unique:true},cliente:{nombre:{type:String,required:true},telefono:{type:String,required:true},direccion:{type:String,required:true},referencia:{type:String,default:''}},estado:{type:String,enum:['RECIBIDO','EN_PREPARACION','LISTO_PARA_DESPACHAR','ASIGNADO','EN_CAMINO','ENTREGADO','NO_ENTREGADO','CANCELADO'],default:'RECIBIDO'},repartidor:{type:mongoose.Schema.Types.ObjectId,ref:'User'},historial:[{estado:String,usuario:{type:mongoose.Schema.Types.ObjectId,ref:'User'},fecha:{type:Date,default:Date.now},observacion:String}]},{timestamps:true});
+module.exports=mongoose.model('Delivery',schema);

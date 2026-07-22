@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const c = require('../controllers/productionController');
+const {protegerRuta, autorizarRoles} = require('../middlewares/authMiddleware');
+router.use(protegerRuta);
+router.get('/', autorizarRoles('ADMIN','LOGISTICA'), c.listar);
+router.post('/', autorizarRoles('ADMIN','LOGISTICA'), c.crear);
+router.put('/:id/aprobar', autorizarRoles('ADMIN','LOGISTICA'), c.aprobar);
+router.put('/:id/terminar', autorizarRoles('ADMIN','LOGISTICA'), c.terminar);
+router.put('/:id/cancelar', autorizarRoles('ADMIN','LOGISTICA'), c.cancelar);
+module.exports = router;

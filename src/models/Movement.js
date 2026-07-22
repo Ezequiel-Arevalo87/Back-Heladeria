@@ -14,7 +14,8 @@ const movementSchema = new mongoose.Schema(
     },
     cantidad: {
       type: Number,
-      required: true
+      required: true,
+      min: 0.000001
     },
     motivo: {
       type: String,

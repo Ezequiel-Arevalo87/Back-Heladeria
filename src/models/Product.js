@@ -16,15 +16,28 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: ''
     },
+    tipoProducto: {
+      type: String,
+      enum: ['MATERIA_PRIMA', 'INSUMO', 'PRODUCTO_TERMINADO', 'REVENTA'],
+      default: 'MATERIA_PRIMA',
+      required: true
+    },
+    precioVenta: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     cantidadActual: {
       type: Number,
       required: true,
-      default: 0
+      default: 0,
+      min: 0
     },
     stockMinimo: {
       type: Number,
       required: true,
-      default: 5
+      default: 5,
+      min: 0
     },
     unidadMedida: {
       type: String,

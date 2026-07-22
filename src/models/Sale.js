@@ -1,0 +1,4 @@
+const mongoose=require('mongoose');
+const item=new mongoose.Schema({producto:{type:mongoose.Schema.Types.ObjectId,ref:'Product',required:true},nombre:{type:String,required:true},cantidad:{type:Number,required:true,min:0.000001},precioUnitario:{type:Number,required:true,min:0},subtotal:{type:Number,required:true,min:0}},{_id:false});
+const schema=new mongoose.Schema({numero:{type:String,unique:true,required:true},caja:{type:mongoose.Schema.Types.ObjectId,ref:'CashRegister',required:true},cajero:{type:mongoose.Schema.Types.ObjectId,ref:'User',required:true},items:{type:[item],validate:v=>v.length>0},total:{type:Number,required:true,min:0},metodoPago:{type:String,enum:['EFECTIVO','TRANSFERENCIA','TARJETA'],required:true},estado:{type:String,enum:['COMPLETADA','ANULADA'],default:'COMPLETADA'},anulacion:{motivo:String,usuario:{type:mongoose.Schema.Types.ObjectId,ref:'User'},fecha:Date}},{timestamps:true});
+module.exports=mongoose.model('Sale',schema);

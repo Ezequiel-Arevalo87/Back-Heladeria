@@ -1,10 +1,31 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const mongoose = require('mongoose');
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const registrarUsuario = async (req, res) => {
   try {
-    const { nombre, correo, password, rol } = req.body;
+    const nombre = req.body.nombre?.trim();
+    const correo = req.body.correo?.trim().toLowerCase();
+    const { password, rol } = req.body;
+
+    if (!nombre || !correo || !password || !rol) {
+      return res.status(400).json({ mensaje: 'Todos los campos son obligatorios' });
+    }
+
+    if (!EMAIL_REGEX.test(correo)) {
+      return res.status(400).json({ mensaje: 'El correo no es válido' });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ mensaje: 'La contraseña debe tener al menos 8 caracteres' });
+    }
+
+    if (!['ADMIN', 'LOGISTICA', 'CAJERO', 'REPARTIDOR'].includes(rol)) {
+      return res.status(400).json({ mensaje: 'El rol no es válido' });
+    }
 
     const existeUsuario = await User.findOne({ correo });
 
@@ -42,7 +63,12 @@ const registrarUsuario = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { correo, password } = req.body;
+    const correo = req.body.correo?.trim().toLowerCase();
+    const { password } = req.body;
+
+    if (!correo || !password) {
+      return res.status(400).json({ mensaje: 'Correo y contraseña son obligatorios' });
+    }
 
     const usuario = await User.findOne({ correo });
 
@@ -50,6 +76,10 @@ const login = async (req, res) => {
       return res.status(404).json({
         mensaje: 'Usuario no encontrado'
       });
+    }
+
+    if (!usuario.estado) {
+      return res.status(403).json({ mensaje: 'El usuario se encuentra desactivado' });
     }
 
     const passwordCorrecto = await bcrypt.compare(password, usuario.password);
@@ -117,8 +147,25 @@ const guardarFcmToken = async (req, res) => {
   }
 };
 
-module.exports = {
-  registrarUsuario,
-  login,
-  guardarFcmToken
+const listarUsuarios = async (req, res) => {
+  const usuarios = await User.find().select('-password -fcmToken').sort({nombre: 1});
+  res.json({usuarios});
 };
+
+const cambiarEstadoUsuario = async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({mensaje: 'Usuario no válido'});
+  if (String(req.usuario._id) === String(req.params.id)) return res.status(400).json({mensaje: 'No puedes desactivar tu propio usuario'});
+  if (typeof req.body.estado !== 'boolean') return res.status(400).json({mensaje: 'El estado debe ser verdadero o falso'});
+  const cambios = {estado: req.body.estado};
+  if (!req.body.estado) cambios.fcmToken = '';
+  const usuario = await User.findByIdAndUpdate(req.params.id, cambios, {new: true, runValidators: true}).select('-password -fcmToken');
+  if (!usuario) return res.status(404).json({mensaje: 'Usuario no encontrado'});
+  res.json({mensaje: req.body.estado ? 'Usuario activado' : 'Usuario desactivado', usuario});
+};
+
+const eliminarFcmToken = async (req,res) => {
+  await User.updateOne({_id:req.usuario._id},{$set:{fcmToken:''}});
+  res.json({mensaje:'Dispositivo desvinculado'});
+};
+
+module.exports = {registrarUsuario, login, guardarFcmToken, listarUsuarios, cambiarEstadoUsuario, eliminarFcmToken};

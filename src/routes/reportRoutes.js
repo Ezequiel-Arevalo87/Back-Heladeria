@@ -1,0 +1,1 @@
+const r=require('express').Router(),c=require('../controllers/reportController'),{protegerRuta,autorizarRoles}=require('../middlewares/authMiddleware');r.get('/diario',protegerRuta,autorizarRoles('ADMIN'),c.diario);module.exports=r;
